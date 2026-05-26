@@ -2,14 +2,16 @@ import './globals.css'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Agentic AI Tender',
-  description: 'Tender intelligence dashboard',
+  title: 'Tender Intelligence Dashboard',
+  description: 'Modern AI-powered tender intelligence product dashboard.',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="min-h-screen bg-slate-950 text-slate-100 antialiased">
+        {children}
+      </body>
     </html>
   )
 }
