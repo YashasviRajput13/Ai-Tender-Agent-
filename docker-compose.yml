@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: agentic_ai_tender
+    ports:
+      - 5432:5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  redis:
+    image: redis:7
+    ports:
+      - 6379:6379
+
+  minio:
+    image: minio/minio:latest
+    command: server /data
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin
+    ports:
+      - 9000:9000
+    volumes:
+      - minio_data:/data
+
+  gateway:
+    build:
+      context: ./backend
+      dockerfile: fastapi_gateway/Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - 8000:8000
+    depends_on:
+      - auth_service
+      - tender_service
+      - analysis_service
+      - notification_service
+
+  auth_service:
+    build:
+      context: ./backend
+      dockerfile: services/auth_service/Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - 8001:8001
+    depends_on:
+      - postgres
+
+  tender_service:
+    build:
+      context: ./backend
+      dockerfile: services/tender_service/Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - 8002:8002
+    depends_on:
+      - postgres
+
+  analysis_service:
+    build:
+      context: ./backend
+      dockerfile: services/analysis_service/Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - 8003:8003
+    depends_on:
+      - redis
+
+  notification_service:
+    build:
+      context: ./backend
+      dockerfile: services/notification_service/Dockerfile
+    env_file:
+      - .env.example
+    ports:
+      - 8004:8004
+    depends_on:
+      - redis
+
+  frontend:
+    build:
+      context: ./frontend/next-app
+      dockerfile: Dockerfile
+    ports:
+      - 3000:3000
+    env_file:
+      - .env.example
+    depends_on:
+      - gateway
+
+volumes:
+  postgres_data:
+  minio_data:
