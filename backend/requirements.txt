@@ -9,3 +9,13 @@ redis==4.6.0
 python-multipart==0.0.6
 beautifulsoup4==4.12.2
 requests==2.31.0
+SQLAlchemy==2.0.48
+psycopg2-binary==2.9.7
+asyncpg==0.30.0
+alembic==1.11.3
+python-dotenv==1.1.1
+playwright>=1.40.0
+PyMuPDF>=1.24.0
+pdfplumber>=0.9.0
+apscheduler>=3.10.0
+python-dateutil>=2.9.0

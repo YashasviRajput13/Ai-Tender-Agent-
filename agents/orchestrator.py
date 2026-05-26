@@ -1,8 +1,8 @@
-from typing import List
+from typing import Dict, List
 
-class DiscoveryAgent:
-    def discover(self, source: str) -> dict:
-        return {"source": source, "status": "discovered", "items": []}
+from .analysis_agent import AnalysisAgent
+from .discovery_agent import DiscoveryAgent
+from .ranking_agent import RankingAgent
 
 class PDFProcessor:
     def process(self, pdf_url: str) -> dict:
@@ -31,6 +31,8 @@ class RecommendNotifier:
 class Orchestrator:
     def __init__(self):
         self.discovery = DiscoveryAgent()
+        self.analysis = AnalysisAgent()
+        self.ranking = RankingAgent()
         self.pdf_processor = PDFProcessor()
         self.eligibility = EligibilityEvaluator()
         self.risk = RiskAssessor()
@@ -39,15 +41,30 @@ class Orchestrator:
 
     def process_tender(self, tender_data: dict, profile: dict) -> dict:
         pdf_result = self.pdf_processor.process(tender_data.get("pdf_url", ""))
+        analysis = self.analysis.score_tender({
+            **tender_data,
+            "requirements": tender_data.get("requirements", []),
+        })
         eligibility = self.eligibility.evaluate(tender_data.get("requirements", []), profile)
         risk = self.risk.assess(tender_data)
         match = self.matching.match(tender_data, profile)
-        recommendation = self.recommender.recommend(risk, eligibility, match)
+        recommendation = self.recommender.recommend(analysis, eligibility, match)
         return {
             "tender": tender_data,
             "pdf": pdf_result,
+            "analysis": analysis,
             "eligibility": eligibility,
             "risk": risk,
             "match": match,
             "recommendation": recommendation,
         }
+
+    def rank_opportunities(self, opportunities: List[dict], profile: dict) -> List[dict]:
+        return self.ranking.rank_opportunities(opportunities, profile)
+
+    def discover_and_process(self, sources: List[str]) -> List[dict]:
+        discovery_results = self.discovery.discover_sources(sources)
+        return [
+            {"source": result["source"], "status": result["status"]}
+            for result in discovery_results
+        ]

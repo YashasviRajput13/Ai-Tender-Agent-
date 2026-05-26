@@ -7,11 +7,12 @@ import { ArrowUpRight } from 'lucide-react'
 interface StatsCardProps {
   title: string
   value: string
-  change: string
-  accent: string
+  change?: string
+  accent?: string
+  detail?: string
 }
 
-export function StatsCard({ title, value, change, accent }: StatsCardProps) {
+export function StatsCard({ title, value, change = "", accent = "from-slate-500 to-slate-700", detail = "" }: StatsCardProps) {
   return (
     <Card className="group overflow-hidden">
       <div className="flex items-start justify-between gap-4">
@@ -26,9 +27,7 @@ export function StatsCard({ title, value, change, accent }: StatsCardProps) {
           </div>
         </div>
       </div>
-      <p className="mt-4 text-sm leading-6 text-slate-400">
-        Powered by AI recommendation models and in-depth tender analytics.
-      </p>
+      <p className="mt-4 text-sm leading-6 text-slate-400">{detail || 'Powered by AI recommendation models and in-depth tender analytics.'}</p>
     </Card>
   )
 }

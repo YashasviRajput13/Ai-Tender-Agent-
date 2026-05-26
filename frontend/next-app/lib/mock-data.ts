@@ -136,6 +136,76 @@ export const recommendations = [
   },
 ]
 
+export const analyticsWidgets = [
+  { label: 'Analytics', value: '92%', detail: 'Conversion rate from discovery to short-list' },
+  { label: 'Tender Trends', value: '+28%', detail: 'Month-over-month tender volume growth' },
+  { label: 'High Match Tenders', value: '19', detail: 'Opportunities above 80% match score' },
+  { label: 'Risk Alerts', value: '7', detail: 'Active tenders requiring immediate attention' },
+]
+
+export const highMatchTenders = [
+  {
+    name: 'Solar Farm Rollout',
+    organization: 'Bright Energy',
+    matchScore: '93%',
+    risk: 'High',
+    value: '$2.7M',
+    deadline: '2026-07-08',
+  },
+  {
+    name: 'Digital Hospital Network',
+    organization: 'MediCore Systems',
+    matchScore: '92%',
+    risk: 'Low',
+    value: '$1.8M',
+    deadline: '2026-06-28',
+  },
+  {
+    name: 'Statewide Data Center',
+    organization: 'CloudWorks',
+    matchScore: '88%',
+    risk: 'Medium',
+    value: '$3.4M',
+    deadline: '2026-07-12',
+  },
+]
+
+export const riskAlerts = [
+  {
+    issue: 'Solar Farm Rollout',
+    status: 'High risk',
+    flag: 'Supply chain volatility',
+  },
+  {
+    issue: 'Metro Rail Expansion',
+    status: 'Medium risk',
+    flag: 'Regulatory review pending',
+  },
+  {
+    issue: 'Healthcare ERP Deployment',
+    status: 'Low risk',
+    flag: 'Certification review',
+  },
+]
+
+export const upcomingDeadlines = [
+  {
+    name: 'Metro Rail Expansion',
+    deadline: '2026-06-14',
+    days: '5 days left',
+  },
+  {
+    name: 'Healthcare ERP Deployment',
+    deadline: '2026-06-22',
+    days: '13 days left',
+  },
+  {
+    name: 'Digital Hospital Network',
+    deadline: '2026-06-28',
+    days: '19 days left',
+  },
+]
+
 export type NotificationType = 'new' | 'deadline' | 'risk'
 
 export const notifications: Array<{
