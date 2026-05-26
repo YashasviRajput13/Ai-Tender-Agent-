@@ -45,6 +45,15 @@ export function DashboardClient() {
   const notifications = notificationsQuery.data ?? []
   const recommendations = recommendationsQuery.data ?? []
 
+  const notificationItems = useMemo(() => {
+    return notifications.map((item: any) => ({
+      title: item.title || "Tender update",
+      description: item.message || item.description || "New notification",
+      type: ["new", "deadline", "risk"].includes(item.notification_type) ? item.notification_type : "new",
+      time: item.created_at ? new Date(item.created_at).toLocaleString() : "Now",
+    }))
+  }, [notifications])
+
   const tenderRows = useMemo(() => {
     return tenders.slice(0, 6).map((tender: any) => ({
       name: tender.title,
@@ -56,7 +65,7 @@ export function DashboardClient() {
     }))
   }, [tenders])
 
-  const highMatchTenders = useMemo(() => {
+  const topRecommendations = useMemo(() => {
     return (recommendations ?? []).slice(0, 3).map((item: any) => ({
       name: item.title,
       organization: item.authority || "",
@@ -67,12 +76,25 @@ export function DashboardClient() {
     }))
   }, [recommendations])
 
-  const riskAlerts = useMemo(() => {
-    return notifications
-      .filter((note: any) => note.notification_type === "risk")
+  const highMatchTenders = useMemo(() => {
+    return (recommendations ?? [])
       .slice(0, 3)
-      .map((note: any) => ({ issue: note.title, status: "High risk", flag: note.message }))
-  }, [notifications])
+      .map((item: any) => ({
+        name: item.title,
+        organization: item.authority || "",
+        matchScore: `${Math.round(item.match_score || 0)}%`,
+        risk: item.risk_level || "Low",
+        value: item.budget || "N/A",
+        deadline: item.deadline || "TBD",
+      }))
+  }, [recommendations])
+
+  const riskAlerts = useMemo(() => {
+    return notificationItems
+      .filter((note: any) => note.type === "risk")
+      .slice(0, 3)
+      .map((note: any) => ({ issue: note.title, status: "High risk", flag: note.description }))
+  }, [notificationItems])
 
   const upcomingDeadlines = useMemo(() => {
     return tenders

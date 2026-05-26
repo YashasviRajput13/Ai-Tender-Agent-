@@ -31,8 +31,14 @@ def parse_deadline(value: str):
 
 
 async def run_scraper_job(source_url: str) -> int:
-    tenders = await scrape_cppt_portal(source_url)
+    try:
+        tenders = await scrape_cppt_portal(source_url)
+    except Exception:
+        tenders = []
+
     total_created = 0
+    if not tenders:
+        return total_created
 
     async with db.async_session() as session:
         for tender_data in tenders:
@@ -45,7 +51,7 @@ async def run_scraper_job(source_url: str) -> int:
                 title=tender_data.get("title") or "Untitled Tender",
                 description=tender_data.get("authority") or "",
                 authority=tender_data.get("authority"),
-                deadline=parse_deadline(tender_data.get("deadline", "")),
+                deadline=parse_deadline(str(tender_data.get("deadline", ""))),
                 estimated_value=parse_value(str(tender_data.get("estimated_value", ""))),
                 category=tender_data.get("category") or "",
                 region=tender_data.get("region") or "",

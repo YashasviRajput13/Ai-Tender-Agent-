@@ -1,15 +1,20 @@
 import os
+import sys
+from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql+asyncpg://postgres:postgres@localhost:5432/agentic_ai_tender",
-)
+ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
+dotenv_path = Path(ROOT_DIR) / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path)
 
+DATABASE_URL = os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    raise RuntimeError("DATABASE_URL must be defined for the tender service.")
+    sqlite_path = Path(ROOT_DIR) / "agentic_ai_tender.db"
+    DATABASE_URL = f"sqlite+aiosqlite:///{sqlite_path}"
 
 engine: AsyncEngine = create_async_engine(
     DATABASE_URL,

@@ -42,16 +42,6 @@ class TenderBase(BaseModel):
     raw_metadata: Optional[dict[str, Any]] = None
 
 
-class TenderCreate(TenderBase):
-    pass
-
-
-class TenderRead(TenderBase, BaseConfig):
-    id: int
-    created_at: datetime
-    updated_at: datetime
-
-
 class TenderDocumentRead(BaseConfig):
     id: int
     tender_id: int
@@ -80,6 +70,18 @@ class TenderAnalysisRead(BaseConfig):
     raw_response: Optional[dict[str, Any]]
     created_at: datetime
     updated_at: datetime
+
+
+class TenderCreate(TenderBase):
+    pass
+
+
+class TenderRead(TenderBase, BaseConfig):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    analysis: Optional[TenderAnalysisRead] = None
+    documents: Optional[List[TenderDocumentRead]] = None
 
 
 class EligibilityRequirementRead(BaseConfig):
@@ -125,6 +127,8 @@ class RecommendationItem(BaseModel):
     match_score: float
     success_probability: float
     risk_level: Optional[str]
+    budget: Optional[str] = None
+    deadline: Optional[str] = None
 
 
 class ScrapeRequest(BaseModel):

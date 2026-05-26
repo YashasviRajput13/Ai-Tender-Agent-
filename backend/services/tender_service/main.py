@@ -1,10 +1,11 @@
 import os
 import sys
 from datetime import datetime
-from typing import Optional
+from typing import Any, Optional
 
 import httpx
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query
+from sqlalchemy import inspect, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", ".."))
@@ -13,7 +14,6 @@ if ROOT_DIR not in sys.path:
 
 from . import crud, db, models, schemas
 from .analysis_agent import analyze_tender_text
-from .matching_agent import score_tender_against_company
 from scrapers.scraper_service import run_scraper_job
 
 app = FastAPI(title="Tender Service")
@@ -138,11 +138,13 @@ async def get_recommendations(
     return [
         schemas.RecommendationItem(
             tender_id=record.tender_id,
-            title=record.tender.title,
-            authority=record.tender.authority,
+            title=getattr(record.tender, "title", "Unknown Tender") if record.tender else "Unknown Tender",
+            authority=getattr(record.tender, "authority", None) if record.tender else None,
             match_score=record.match_score or 0.0,
             success_probability=record.success_probability or 0.0,
             risk_level=record.risk_level,
+            budget=record.budget,
+            deadline=record.deadline,
         )
         for record in items
     ]
@@ -171,8 +173,30 @@ async def create_notification(request: schemas.NotificationCreate, db: AsyncSess
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    return {
+    database_url = os.getenv("POSTGRES_URL") or os.getenv(
+        "DATABASE_URL",
+        "postgresql+asyncpg://postgres:postgres@localhost:5432/agentic_ai_tender",
+    )
+    report = {
         "status": "ok",
         "service": "tender",
-        "database": os.getenv("DATABASE_URL", "postgresql+asyncpg://postgres:postgres@localhost:5432/agentic_ai_tender"),
+        "database_url": database_url,
+        "connection": "unknown",
+        "select_1": "unknown",
+        "tables": [],
+        "alembic_version": None,
     }
+    try:
+        async with db.engine.connect() as connection:
+            report["connection"] = "PASS"
+            result = await connection.execute(text("SELECT 1"))
+            report["select_1"] = result.scalar() == 1
+            report["tables"] = await connection.run_sync(lambda sync_conn: inspect(sync_conn).get_table_names())
+            version_result = await connection.execute(text("SELECT version_num FROM alembic_version"))
+            report["alembic_version"] = [row[0] for row in version_result.fetchall()]
+    except Exception as exc:
+        report["status"] = "fail"
+        report["connection"] = "FAIL"
+        report["error"] = str(exc)
+        report["select_1"] = False
+    return report

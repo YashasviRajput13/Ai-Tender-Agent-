@@ -1,12 +1,20 @@
 import os
 import sys
 from logging.config import fileConfig
+from pathlib import Path
 
+from dotenv import load_dotenv
 from sqlalchemy import pool
 from sqlalchemy.engine import Engine
 from sqlalchemy.ext.asyncio import AsyncEngine, create_async_engine
 
 from alembic import context
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+ROOT_DIR = os.path.abspath(os.path.join(BASE_DIR, ".."))
+dotenv_path = Path(ROOT_DIR) / ".env"
+if dotenv_path.exists():
+    load_dotenv(dotenv_path)
 
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
@@ -16,7 +24,7 @@ config = context.config
 if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
-DATABASE_URL = os.getenv(
+DATABASE_URL = os.getenv("POSTGRES_URL") or os.getenv(
     "DATABASE_URL",
     "postgresql+asyncpg://postgres:postgres@postgres:5432/agentic_ai_tender",
 )

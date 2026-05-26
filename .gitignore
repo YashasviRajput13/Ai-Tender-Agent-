@@ -24,3 +24,7 @@ docker-compose.override.yml
 
 # VS Code
 .vscode/
+
+# Local database files
+agentic_ai_tender.db
+backend/agentic_ai_tender.db

@@ -1,14 +1,17 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from sqlalchemy import asc, func, select
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from . import models, schemas
 
 
 async def get_tender(db: AsyncSession, tender_id: int) -> Optional[models.Tender]:
-    result = await db.execute(select(models.Tender).where(models.Tender.id == tender_id))
+    result = await db.execute(
+        select(models.Tender).options(selectinload(models.Tender.analysis)).where(models.Tender.id == tender_id)
+    )
     return result.scalars().first()
 
 
@@ -28,7 +31,7 @@ async def list_tenders(
     category: Optional[str] = None,
     status: Optional[str] = None,
 ) -> List[models.Tender]:
-    query = select(models.Tender)
+    query = select(models.Tender).options(selectinload(models.Tender.analysis))
     if region:
         query = query.where(models.Tender.region.ilike(f"%{region}%"))
     if category:
@@ -41,7 +44,9 @@ async def list_tenders(
 
 
 async def list_recent_tenders(db: AsyncSession, limit: int = 10) -> List[models.Tender]:
-    result = await db.execute(select(models.Tender).order_by(models.Tender.created_at.desc()).limit(limit))
+    result = await db.execute(
+        select(models.Tender).order_by(models.Tender.created_at.desc()).limit(limit)
+    )
     return result.scalars().all()
 
 
@@ -131,7 +136,9 @@ async def get_dashboard_stats(db: AsyncSession) -> dict[str, int]:
 
 
 async def list_recommendations(db: AsyncSession, company_id: Optional[int] = None, limit: int = 10) -> List[models.TenderAnalysis]:
-    query = select(models.TenderAnalysis).order_by(models.TenderAnalysis.match_score.desc().nullslast()).limit(limit)
+    query = select(models.TenderAnalysis).options(selectinload(models.TenderAnalysis.tender)).order_by(
+        models.TenderAnalysis.match_score.desc().nullslast()
+    ).limit(limit)
     result = await db.execute(query)
     return result.scalars().all()
 
