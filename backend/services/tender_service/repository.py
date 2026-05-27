@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any, List, Optional
 
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -129,6 +129,17 @@ async def create_notification(db: AsyncSession, notification: schemas.Notificati
     return record
 
 
+async def delete_demo_tenders(db: AsyncSession) -> int:
+    result = await db.execute(select(models.Tender).where(models.Tender.source == "cppt"))
+    tenders = result.scalars().all()
+    deleted = 0
+    for tender in tenders:
+        await db.delete(tender)
+        deleted += 1
+    await db.commit()
+    return deleted
+
+
 async def get_dashboard_stats(db: AsyncSession) -> dict[str, int]:
     total = await db.scalar(select(func.count()).select_from(models.Tender))
     active = await db.scalar(select(func.count()).select_from(models.Tender).where(models.Tender.status == "open"))
@@ -170,3 +181,59 @@ async def audit_action(db: AsyncSession, entity_type: str, entity_id: Optional[i
     await db.commit()
     await db.refresh(record)
     return record
+
+
+async def create_scraper_log(
+    db: AsyncSession,
+    source_url: str,
+    status: str = "running",
+    message: Optional[str] = None,
+    records_scraped: int = 0,
+    records_created: int = 0,
+) -> models.ScraperLog:
+    record = models.ScraperLog(
+        source_url=source_url,
+        status=status,
+        message=message,
+        records_scraped=records_scraped,
+        records_created=records_created,
+        started_at=datetime.utcnow(),
+    )
+    db.add(record)
+    await db.commit()
+    await db.refresh(record)
+    return record
+
+
+async def update_scraper_log(
+    db: AsyncSession,
+    log_id: int,
+    status: str,
+    finished_at: Optional[datetime] = None,
+    message: Optional[str] = None,
+    records_scraped: Optional[int] = None,
+    records_created: Optional[int] = None,
+) -> models.ScraperLog:
+    record = await db.get(models.ScraperLog, log_id)
+    if record is None:
+        raise ValueError("Scraper log not found")
+    record.status = status
+    if finished_at is not None:
+        record.finished_at = finished_at
+    if message is not None:
+        record.message = message
+    if records_scraped is not None:
+        record.records_scraped = records_scraped
+    if records_created is not None:
+        record.records_created = records_created
+    db.add(record)
+    await db.commit()
+    await db.refresh(record)
+    return record
+
+
+async def get_scrape_logs(db: AsyncSession, limit: int = 50) -> List[models.ScraperLog]:
+    result = await db.execute(
+        select(models.ScraperLog).order_by(models.ScraperLog.started_at.desc()).limit(limit)
+    )
+    return result.scalars().all()

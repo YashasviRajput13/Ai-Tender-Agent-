@@ -115,6 +115,16 @@ async def proxy_scrape_start(request: Request, jwt_payload: Dict | None = Depend
     return await proxy_request("tender", request, jwt_payload)
 
 
+@app.api_route("/scrape/status", methods=["GET"])
+async def proxy_scrape_status(request: Request, jwt_payload: Dict | None = Depends(optional_jwt)):
+    return await proxy_request("tender", request, jwt_payload)
+
+
+@app.api_route("/scrape/logs", methods=["GET"])
+async def proxy_scrape_logs(request: Request, jwt_payload: Dict | None = Depends(optional_jwt)):
+    return await proxy_request("tender", request, jwt_payload)
+
+
 @app.api_route("/analysis/{path:path}", methods=["GET", "POST", "PUT", "PATCH"])
 async def proxy_analysis_routes(path: str, request: Request, jwt_payload: Dict = Depends(verify_jwt)):
     return await proxy_request("tender", request, jwt_payload)

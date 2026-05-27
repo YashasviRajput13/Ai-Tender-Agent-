@@ -1,10 +1,12 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { Card } from './ui/card'
 import { Button } from './ui/button'
 import { Badge } from './ui/badge'
 
 interface TenderRow {
+  id: number
   name: string
   organization: string
   budget: string
@@ -24,6 +26,12 @@ const riskColor: Record<'Low' | 'Medium' | 'High', 'success' | 'warning' | 'dang
 }
 
 export function TenderTable({ rows }: TenderTableProps) {
+  const router = useRouter()
+
+  const onRowClick = (id: number) => {
+    router.push(`/tenders/${id}`)
+  }
+
   return (
     <Card>
       <div className="mb-6 flex items-center justify-between gap-4">
@@ -49,7 +57,11 @@ export function TenderTable({ rows }: TenderTableProps) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.name} className="border-b border-white/10 transition hover:bg-white/5">
+              <tr
+                key={row.id}
+                className="border-b border-white/10 transition hover:bg-white/5 hover:cursor-pointer"
+                onClick={() => onRowClick(row.id)}
+              >
                 <td className="px-6 py-4 font-semibold text-white">{row.name}</td>
                 <td className="px-6 py-4">{row.organization}</td>
                 <td className="px-6 py-4">{row.budget}</td>
@@ -59,7 +71,7 @@ export function TenderTable({ rows }: TenderTableProps) {
                   <Badge variant={riskColor[row.riskLevel] || 'default'}>{row.riskLevel}</Badge>
                 </td>
                 <td className="px-6 py-4">
-                  <Button variant="ghost" className="px-3 py-2 text-xs">
+                  <Button variant="ghost" className="px-3 py-2 text-xs" onClick={(event) => { event.stopPropagation(); onRowClick(row.id) }}>
                     Review
                   </Button>
                 </td>

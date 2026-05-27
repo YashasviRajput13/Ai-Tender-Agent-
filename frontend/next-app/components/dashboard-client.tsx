@@ -56,6 +56,7 @@ export function DashboardClient() {
 
   const tenderRows = useMemo(() => {
     return tenders.slice(0, 6).map((tender: any) => ({
+      id: tender.id,
       name: tender.title,
       organization: tender.authority || "",
       budget: formatMoney(tender.estimated_value),

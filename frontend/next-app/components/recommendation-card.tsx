@@ -5,18 +5,20 @@ import { Button } from './ui/button'
 
 interface RecommendationCardProps {
   name: string
+  organization?: string
   value: string
   matchScore: string
   risk: string
   deadline: string
 }
 
-export function RecommendationCard({ name, value, matchScore, risk, deadline }: RecommendationCardProps) {
+export function RecommendationCard({ name, organization, value, matchScore, risk, deadline }: RecommendationCardProps) {
   return (
     <div className="rounded-[28px] border border-white/10 bg-slate-950/70 p-5 shadow-card transition hover:-translate-y-0.5 hover:bg-slate-900/80">
       <div className="flex items-center justify-between gap-3">
         <div>
           <p className="text-sm font-semibold text-white">{name}</p>
+          {organization ? <p className="mt-1 text-xs text-slate-400">{organization}</p> : null}
           <p className="mt-1 text-xs text-slate-400">Estimated revenue {value}</p>
         </div>
         <Badge variant="info">{matchScore}</Badge>

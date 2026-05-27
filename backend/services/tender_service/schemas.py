@@ -28,7 +28,7 @@ class UserRead(BaseConfig):
 
 
 class TenderBase(BaseModel):
-    source: Optional[str] = Field(default="cppt")
+    source: Optional[str] = Field(default="eprocure")
     source_tender_id: Optional[str]
     title: str
     description: Optional[str] = None
@@ -58,6 +58,9 @@ class TenderAnalysisRead(BaseConfig):
     summary: Optional[str]
     eligibility: Optional[List[str]]
     required_documents: Optional[List[str]]
+    technical_requirements: Optional[List[str]]
+    risk_factors: Optional[List[str]]
+    recommendation: Optional[str]
     risk_level: Optional[str]
     risk_reasons: Optional[List[str]]
     category: Optional[str]
@@ -143,9 +146,24 @@ class RecommendationQuery(BaseModel):
     company_id: Optional[int] = None
 
 
+class ScrapeLogRead(BaseConfig):
+    id: int
+    source_url: str
+    status: str
+    message: Optional[str]
+    records_scraped: int
+    records_created: int
+    started_at: datetime
+    finished_at: Optional[datetime]
+
+
 class NotificationCreate(BaseModel):
     title: str
     message: str
     notification_type: str = Field(default="info")
     tender_id: Optional[int] = None
     user_id: Optional[int] = None
+
+
+class NotificationEmailRequest(BaseModel):
+    recipient: str

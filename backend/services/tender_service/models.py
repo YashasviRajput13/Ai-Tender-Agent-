@@ -10,6 +10,7 @@ from sqlalchemy import (
     JSON,
     String,
     Text,
+    UniqueConstraint,
 )
 from sqlalchemy.orm import declarative_base, relationship
 
@@ -45,6 +46,9 @@ class User(Base):
 
 class Tender(Base):
     __tablename__ = "tenders"
+    __table_args__ = (
+        UniqueConstraint("source", "source_tender_id", name="uix_tenders_source_source_tender_id"),
+    )
 
     id = Column(Integer, primary_key=True, index=True)
     source = Column(String(128), nullable=False, default="cppt")
@@ -91,6 +95,9 @@ class TenderAnalysis(Base):
     summary = Column(Text, nullable=True)
     eligibility = Column(JSON, nullable=True)
     required_documents = Column(JSON, nullable=True)
+    technical_requirements = Column(JSON, nullable=True)
+    risk_factors = Column(JSON, nullable=True)
+    recommendation = Column(Text, nullable=True)
     risk_level = Column(String(32), nullable=True)
     risk_reasons = Column(JSON, nullable=True)
     category = Column(String(128), nullable=True)
@@ -166,3 +173,16 @@ class AuditLog(Base):
     action = Column(String(128), nullable=False)
     details = Column(JSON, nullable=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class ScraperLog(Base):
+    __tablename__ = "scraper_logs"
+
+    id = Column(Integer, primary_key=True, index=True)
+    source_url = Column(String(512), nullable=False)
+    status = Column(String(32), nullable=False, default="running")
+    message = Column(Text, nullable=True)
+    records_scraped = Column(Integer, nullable=False, default=0)
+    records_created = Column(Integer, nullable=False, default=0)
+    started_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    finished_at = Column(DateTime, nullable=True)
