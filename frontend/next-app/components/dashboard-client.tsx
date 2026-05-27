@@ -156,7 +156,25 @@ export function DashboardClient() {
           ))}
         </div>
         <div className="grid gap-6">
-          <RecommendationCard key="recommendation" name="Live Recommendations" value="" matchScore="" risk="" deadline="" />
+          <div className="space-y-4">
+            {topRecommendations.length > 0 ? (
+              topRecommendations.map((item) => (
+                <RecommendationCard
+                  key={item.name}
+                  name={item.name}
+                  organization={item.organization}
+                  matchScore={item.matchScore}
+                  risk={item.risk}
+                  value={item.value}
+                  deadline={item.deadline}
+                />
+              ))
+            ) : (
+              <div className="rounded-3xl border border-white/10 bg-slate-950/80 p-4 text-slate-300">
+                Loading live recommendations...
+              </div>
+            )}
+          </div>
           <NotificationPanel items={notifications} compact />
         </div>
       </section>

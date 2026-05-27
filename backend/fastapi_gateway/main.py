@@ -2,7 +2,7 @@ import os
 from typing import Dict, List
 
 import httpx
-from fastapi import Depends, FastAPI, Header, HTTPException, Request, WebSocket, WebSocketDisconnect, status
+from fastapi import Depends, FastAPI, Header, HTTPException, Request, Response, WebSocket, WebSocketDisconnect, status
 from fastapi.middleware.cors import CORSMiddleware
 from jose import JWTError, jwt
 
@@ -53,12 +53,29 @@ async def optional_jwt(authorization: str | None = Header(None)) -> Dict | None:
 
 @app.get("/health")
 async def health():
-    return {"status": "ok", "services": SERVICES, "allow_public_tenders": ALLOW_PUBLIC_TENDERS}
+    health_status = {"status": "healthy", "database": "disconnected"}
+    try:
+        async with httpx.AsyncClient(timeout=5) as client:
+            response = await client.get(f"{SERVICES['tender']}/health")
+            if response.status_code == 200:
+                data = response.json()
+                if data.get("connection") == "PASS" or data.get("select_1") is True:
+                    health_status["database"] = "connected"
+                else:
+                    health_status["database"] = "disconnected"
+            else:
+                health_status["status"] = "degraded"
+    except Exception:
+        health_status["status"] = "degraded"
+    return health_status
 
 
 async def proxy_request(service: str, request: Request, jwt_payload: Dict | None = None):
-    url = SERVICES[service] + request.url.path
-    async with httpx.AsyncClient(timeout=30) as client:
+    target_path = request.url.path
+    if target_path.endswith("/") and target_path != "/":
+        target_path = target_path.rstrip("/")
+    url = SERVICES[service] + target_path
+    async with httpx.AsyncClient(timeout=30, follow_redirects=True) as client:
         headers = {k: v for k, v in request.headers.items() if k.lower() != "host"}
         if jwt_payload:
             headers["x-user"] = jwt_payload.get("sub", "anonymous")
@@ -69,12 +86,23 @@ async def proxy_request(service: str, request: Request, jwt_payload: Dict | None
             params=request.query_params,
             content=await request.body(),
         )
-    return response.json()
+    content = response.content
+    headers = {
+        k: v
+        for k, v in response.headers.items()
+        if k.lower() not in ("content-length", "transfer-encoding", "content-encoding", "connection")
+    }
+    return Response(content=content, status_code=response.status_code, headers=headers, media_type=response.headers.get("content-type"))
 
 
 @app.post("/auth/login")
 async def login(request: Request):
     return await proxy_request("auth", request)
+
+
+@app.api_route("/tenders", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
+async def proxy_tenders_root(request: Request, jwt_payload: Dict | None = Depends(optional_jwt)):
+    return await proxy_request("tender", request, jwt_payload)
 
 
 @app.api_route("/tenders/{path:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])

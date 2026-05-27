@@ -12,8 +12,9 @@ ROOT_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "
 if ROOT_DIR not in sys.path:
     sys.path.insert(0, ROOT_DIR)
 
-from . import crud, db, models, schemas
+from . import db, models, schemas
 from .analysis_agent import analyze_tender_text
+from . import repository as repo
 from scrapers.scraper_service import run_scraper_job
 
 app = FastAPI(title="Tender Service")
@@ -44,21 +45,52 @@ async def get_db() -> AsyncSession:
 
 
 @app.get("/tenders", response_model=list[schemas.TenderRead])
-async def list_tenders(
+async def list_tenders_endpoint(
     region: str | None = Query(None),
     category: str | None = Query(None),
     status: str | None = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_tenders(db, region=region, category=category, status=status)
+    return await repo.list_tenders(db, region=region, category=category, status=status)
 
 
 @app.get("/tenders/{tender_id}", response_model=schemas.TenderRead)
-async def get_tender(tender_id: int, db: AsyncSession = Depends(get_db)):
-    tender = await crud.get_tender(db, tender_id)
+async def get_tender_endpoint(tender_id: int, db: AsyncSession = Depends(get_db)):
+    tender = await repo.get_tender(db, tender_id)
     if tender is None:
         raise HTTPException(status_code=404, detail="Tender not found")
     return tender
+
+
+@app.post("/tenders", response_model=schemas.TenderRead)
+async def create_tender_endpoint(request: schemas.TenderCreate, db: AsyncSession = Depends(get_db)):
+    return await repo.create_tender(db, request)
+
+
+@app.put("/tenders/{tender_id}", response_model=schemas.TenderRead)
+async def update_tender_endpoint(
+    tender_id: int,
+    request: schemas.TenderCreate,
+    db: AsyncSession = Depends(get_db),
+):
+    tender = await repo.get_tender(db, tender_id)
+    if tender is None:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    for key, value in request.model_dump().items():
+        setattr(tender, key, value)
+    await db.commit()
+    await db.refresh(tender)
+    return tender
+
+
+@app.delete("/tenders/{tender_id}")
+async def delete_tender_endpoint(tender_id: int, db: AsyncSession = Depends(get_db)):
+    tender = await repo.get_tender(db, tender_id)
+    if tender is None:
+        raise HTTPException(status_code=404, detail="Tender not found")
+    await db.delete(tender)
+    await db.commit()
+    return {"status": "deleted", "tender_id": tender_id}
 
 
 @app.post("/tenders/import", response_model=list[schemas.TenderRead])
@@ -66,7 +98,7 @@ async def import_tenders(
     payload: list[schemas.TenderCreate],
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.import_tenders(db, payload)
+    return await repo.import_tenders(db, payload)
 
 
 @app.post("/scrape/start")
@@ -87,13 +119,13 @@ async def start_analysis(
     request: schemas.AnalysisRequest,
     db: AsyncSession = Depends(get_db),
 ):
-    tender = await crud.get_tender(db, request.tender_id)
+    tender = await repo.get_tender(db, request.tender_id)
     if tender is None:
         raise HTTPException(status_code=404, detail="Tender not found")
 
     async def analyze_and_store():
         async with db.async_session() as session:
-            current_tender = await crud.get_tender(session, request.tender_id)
+            current_tender = await repo.get_tender(session, request.tender_id)
             if current_tender is None:
                 return
             if current_tender.documents:
@@ -114,7 +146,7 @@ async def start_analysis(
                 "confidence_score": result.get("confidence_score"),
                 "raw_response": result,
             }
-            await crud.create_or_update_analysis(session, request.tender_id, analysis_payload)
+            await repo.create_or_update_analysis(session, request.tender_id, analysis_payload)
         await publish_event({"type": "analysis.completed", "tender_id": request.tender_id})
 
     background_tasks.add_task(analyze_and_store)
@@ -123,7 +155,7 @@ async def start_analysis(
 
 @app.get("/analysis/{tender_id}", response_model=schemas.TenderAnalysisRead)
 async def get_analysis(tender_id: int, db: AsyncSession = Depends(get_db)):
-    analysis = await crud.get_analysis(db, tender_id)
+    analysis = await repo.get_analysis(db, tender_id)
     if analysis is None:
         raise HTTPException(status_code=404, detail="Analysis not found")
     return analysis
@@ -134,7 +166,7 @@ async def get_recommendations(
     company_id: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
-    items = await crud.list_recommendations(db, company_id=company_id)
+    items = await repo.list_recommendations(db, company_id=company_id)
     return [
         schemas.RecommendationItem(
             tender_id=record.tender_id,
@@ -152,7 +184,7 @@ async def get_recommendations(
 
 @app.get("/dashboard/stats", response_model=schemas.DashboardStats)
 async def dashboard_stats(db: AsyncSession = Depends(get_db)):
-    stats = await crud.get_dashboard_stats(db)
+    stats = await repo.get_dashboard_stats(db)
     return schemas.DashboardStats(**stats)
 
 
@@ -161,12 +193,12 @@ async def notifications(
     user_id: Optional[int] = Query(None),
     db: AsyncSession = Depends(get_db),
 ):
-    return await crud.list_notifications(db, user_id=user_id)
+    return await repo.list_notifications(db, user_id=user_id)
 
 
 @app.post("/notifications", response_model=schemas.NotificationRead)
 async def create_notification(request: schemas.NotificationCreate, db: AsyncSession = Depends(get_db)):
-    notification = await crud.create_notification(db, request)
+    notification = await repo.create_notification(db, request)
     await publish_event({"type": "notification.created", "notification_id": notification.id})
     return notification
 
