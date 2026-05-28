@@ -11,8 +11,8 @@ export function Button({ className, variant = 'primary', ...props }: ButtonProps
       className={cn(
         'inline-flex items-center justify-center rounded-full px-5 py-2.5 text-sm font-semibold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-400/50',
         variant === 'primary'
-          ? 'bg-gradient-to-r from-blue-500 via-violet-500 to-fuchsia-500 text-white shadow-glow hover:brightness-110'
-          : 'bg-white/5 text-slate-100 hover:bg-white/10',
+          ? 'bg-blue-600 text-white shadow-sm hover:bg-blue-700'
+          : 'bg-slate-100 text-slate-900 hover:bg-slate-200',
         className,
       )}
       {...props}

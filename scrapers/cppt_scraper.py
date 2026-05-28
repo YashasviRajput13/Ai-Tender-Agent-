@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 SOURCES = [
     {"name": "eprocure", "root": "https://eprocure.gov.in/eprocure/app"},
     {"name": "epublish", "root": "https://eprocure.gov.in/epublish/app"},
-    {"name": "mptenders", "root": "https://mptenders.gov.in/nicgep/app"},
+    {"name": "mptenders", "root": "https://mptenders.gov.in/"},
 ]
 LIST_QUERY = "?page=FrontEndListTendersbyDate&service=page"
 TABLE_ROW_SELECTORS = ["tr.even", "tr.odd"]
@@ -27,7 +27,7 @@ def extract_tender_id(text: str) -> str:
     if not text:
         return ""
     patterns = [
-        r'\[([^\]]+/[^" ]+)\]',
+        r'\[([^\]]+/[^"]+)\]',
         r"\[([A-Z0-9_\-]{5,})\]",
         r"\b([A-Z]{2,6}[-/]?\d{2,10})\b",
         r"Tender\s*No\.?\s*[:\-]?\s*([A-Z0-9\-/]+)",

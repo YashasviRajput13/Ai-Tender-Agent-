@@ -36,16 +36,16 @@ export function TenderTable({ rows }: TenderTableProps) {
     <Card>
       <div className="mb-6 flex items-center justify-between gap-4">
         <div>
-          <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Tender pipeline</p>
-          <h2 className="mt-2 text-2xl font-semibold text-white">Recent tender activity</h2>
+          <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Tender pipeline</p>
+          <h2 className="mt-2 text-2xl font-semibold text-slate-900">Recent tender activity</h2>
         </div>
         <Button variant="ghost">View all</Button>
       </div>
 
-      <div className="overflow-hidden rounded-[28px] border border-white/10 bg-white/5">
-        <table className="min-w-full border-collapse text-left text-sm text-slate-300">
+      <div className="overflow-hidden rounded-[28px] border border-slate-200 bg-slate-50">
+        <table className="min-w-full border-collapse text-left text-sm text-slate-700">
           <thead>
-            <tr className="border-b border-white/10 text-slate-400">
+            <tr className="border-b border-slate-200 text-slate-500">
               <th className="px-6 py-4">Tender Name</th>
               <th className="px-6 py-4">Organization</th>
               <th className="px-6 py-4">Budget</th>
@@ -59,14 +59,14 @@ export function TenderTable({ rows }: TenderTableProps) {
             {rows.map((row) => (
               <tr
                 key={row.id}
-                className="border-b border-white/10 transition hover:bg-white/5 hover:cursor-pointer"
+                className="border-b border-slate-200 transition hover:bg-slate-100 hover:cursor-pointer"
                 onClick={() => onRowClick(row.id)}
               >
-                <td className="px-6 py-4 font-semibold text-white">{row.name}</td>
-                <td className="px-6 py-4">{row.organization}</td>
-                <td className="px-6 py-4">{row.budget}</td>
-                <td className="px-6 py-4">{row.deadline}</td>
-                <td className="px-6 py-4">{row.matchScore}</td>
+                <td className="px-6 py-4 font-semibold text-slate-900">{row.name}</td>
+                <td className="px-6 py-4 text-slate-700">{row.organization}</td>
+                <td className="px-6 py-4 text-slate-700">{row.budget}</td>
+                <td className="px-6 py-4 text-slate-700">{row.deadline}</td>
+                <td className="px-6 py-4 text-slate-700">{row.matchScore}</td>
                 <td className="px-6 py-4">
                   <Badge variant={riskColor[row.riskLevel] || 'default'}>{row.riskLevel}</Badge>
                 </td>

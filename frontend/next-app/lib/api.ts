@@ -12,3 +12,18 @@ export async function fetcher<T>(path: string): Promise<T> {
   }
   return response.json()
 }
+
+export async function postData<T>(path: string, data: unknown): Promise<T> {
+  const response = await fetch(`${API_BASE}${path}`, {
+    method: "POST",
+    cache: "no-store",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  })
+  if (!response.ok) {
+    throw new Error(`API request failed: ${response.status} ${response.statusText}`)
+  }
+  return response.json()
+}

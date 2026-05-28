@@ -12,18 +12,22 @@ const navItems = [
 
 export function Sidebar() {
   return (
-    <aside className="sticky top-6 flex h-[calc(100vh-3rem)] flex-col gap-6 rounded-[32px] border border-white/10 bg-slate-950/80 p-6 shadow-card backdrop-blur-xl">
+    <aside className="sticky top-6 flex h-[calc(100vh-3rem)] flex-col gap-6 rounded-[32px] border border-slate-200 bg-white p-6 shadow-sm">
       <div className="space-y-3">
-        <div className="inline-flex items-center gap-3 rounded-3xl bg-gradient-to-r from-blue-500/20 to-violet-500/10 px-4 py-3 text-white ring-1 ring-white/10">
-          <div className="rounded-2xl bg-white/10 p-2">
-            <Sparkles className="h-5 w-5 text-white" />
+        <div className="inline-flex items-center gap-3 rounded-3xl bg-blue-50 px-4 py-3 text-slate-900 ring-1 ring-slate-200">
+          <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-sky-500 to-emerald-400 text-white shadow-sm">
+            <svg viewBox="0 0 64 64" className="h-6 w-6" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 24C12 12 25 6 32 8C39 6 52 12 56 24C48 20 40 18 32 26C24 18 16 20 8 24Z" fill="white" />
+              <path d="M16 40C20 32 28 26 32 28C36 26 44 32 48 40C40 36 34 34 32 38C30 34 24 36 16 40Z" fill="white" />
+              <path d="M28 46C30 42 34 42 36 46C38 50 34 58 32 62C30 58 26 50 28 46Z" fill="white" />
+            </svg>
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.32em] text-slate-400">Agentic AI</p>
-            <p className="font-semibold">Tender Intelligence</p>
+            <p className="text-xs uppercase tracking-[0.32em] text-slate-500">AI Tender Intel</p>
+            <p className="font-semibold text-slate-900">TenderIQ</p>
           </div>
         </div>
-        <p className="text-sm leading-6 text-slate-400">
+        <p className="text-sm leading-6 text-slate-600">
           Centralize your tender discovery and recommendation engine with AI-driven insights.
         </p>
       </div>
@@ -33,15 +37,15 @@ export function Sidebar() {
           <Link
             key={item.label}
             href={item.href}
-            className="group flex items-center gap-3 rounded-3xl border border-white/5 bg-white/5 px-4 py-3 text-sm text-slate-200 transition hover:border-blue-400/30 hover:bg-blue-500/10"
+            className="group flex items-center gap-3 rounded-3xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-700 transition hover:border-blue-200 hover:bg-blue-50"
           >
-            <item.icon className="h-5 w-5 text-slate-300 group-hover:text-white" />
+            <item.icon className="h-5 w-5 text-slate-500 group-hover:text-blue-600" />
             <span>{item.label}</span>
           </Link>
         ))}
       </nav>
 
-      <div className="rounded-[28px] border border-white/10 bg-slate-900/80 p-4 text-sm text-slate-400">
+      <div className="rounded-[28px] border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
         <p className="text-xs uppercase tracking-[0.28em] text-slate-500">Tip</p>
         <p className="mt-3 leading-6">
           Use the AI Analysis section to validate eligibility and risk before preparing your response.

@@ -17,8 +17,8 @@ export function StatsCard({ title, value, change = "", accent = "from-slate-500 
     <Card className="group overflow-hidden">
       <div className="flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-[0.32em] text-slate-400">{title}</p>
-          <p className="mt-3 text-3xl font-semibold text-white">{value}</p>
+          <p className="text-sm uppercase tracking-[0.32em] text-slate-500">{title}</p>
+          <p className="mt-3 text-3xl font-semibold text-slate-900">{value}</p>
         </div>
         <div className={cn('rounded-3xl px-4 py-3 text-sm font-semibold text-white', `bg-gradient-to-br ${accent}`)}>
           <div className="flex items-center gap-2">
@@ -27,7 +27,7 @@ export function StatsCard({ title, value, change = "", accent = "from-slate-500 
           </div>
         </div>
       </div>
-      <p className="mt-4 text-sm leading-6 text-slate-400">{detail || 'Powered by AI recommendation models and in-depth tender analytics.'}</p>
+      <p className="mt-4 text-sm leading-6 text-slate-500">{detail || 'Powered by AI recommendation models and in-depth tender analytics.'}</p>
     </Card>
   )
 }

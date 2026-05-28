@@ -346,8 +346,8 @@ async def send_notification_email(
 
 @app.get("/health")
 async def health() -> dict[str, Any]:
-    database_url = os.getenv("POSTGRES_URL") or os.getenv(
-        "DATABASE_URL",
+    database_url = os.getenv("DATABASE_URL") or os.getenv(
+        "POSTGRES_URL",
         "postgresql+asyncpg://postgres:postgres@localhost:5432/agentic_ai_tender",
     )
     report = {
@@ -365,8 +365,11 @@ async def health() -> dict[str, Any]:
             result = await connection.execute(text("SELECT 1"))
             report["select_1"] = result.scalar() == 1
             report["tables"] = await connection.run_sync(lambda sync_conn: inspect(sync_conn).get_table_names())
-            version_result = await connection.execute(text("SELECT version_num FROM alembic_version"))
-            report["alembic_version"] = [row[0] for row in version_result.fetchall()]
+            try:
+                version_result = await connection.execute(text("SELECT version_num FROM alembic_version"))
+                report["alembic_version"] = [row[0] for row in version_result.fetchall()]
+            except Exception:
+                report["alembic_version"] = None
     except Exception as exc:
         report["status"] = "fail"
         report["connection"] = "FAIL"

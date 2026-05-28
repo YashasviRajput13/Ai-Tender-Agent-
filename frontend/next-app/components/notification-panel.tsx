@@ -41,8 +41,8 @@ export function NotificationPanel({ items, compact = false }: NotificationPanelP
   return (
     <Card className={compact ? 'space-y-4' : 'space-y-6'}>
       <div>
-        <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Notification panel</p>
-        <h2 className="mt-2 text-2xl font-semibold text-white">Latest alerts</h2>
+        <p className="text-xs uppercase tracking-[0.24em] text-slate-500">Notification panel</p>
+        <h2 className="mt-2 text-2xl font-semibold text-slate-900">Latest alerts</h2>
       </div>
 
       <div className="space-y-4">
@@ -62,15 +62,15 @@ export function NotificationPanel({ items, compact = false }: NotificationPanelP
           const badgeVariant = meta.variant
 
           return (
-            <div key={`${title}-${index}`} className="rounded-3xl border border-white/10 bg-slate-950/70 p-4 transition hover:border-blue-400/20 hover:bg-slate-900/80">
+            <div key={`${title}-${index}`} className="rounded-3xl border border-slate-200 bg-slate-50 p-4 transition hover:border-blue-200 hover:bg-white">
               <div className="flex items-start justify-between gap-3">
                 <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-white/5 text-blue-400">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-100 text-blue-600">
                     <Icon className="h-5 w-5" />
                   </span>
                   <div>
-                    <p className="text-sm font-semibold text-white">{title}</p>
-                    <p className="mt-1 text-sm text-slate-400">{description}</p>
+                    <p className="text-sm font-semibold text-slate-900">{title}</p>
+                    <p className="mt-1 text-sm text-slate-500">{description}</p>
                   </div>
                 </div>
                 <Badge variant={badgeVariant}>{badgeText}</Badge>

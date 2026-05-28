@@ -18,7 +18,7 @@ def normalize_database_url(url: str | None) -> str | None:
         return url.replace("postgresql://", "postgresql+asyncpg://", 1)
     return url
 
-DATABASE_URL = normalize_database_url(os.getenv("POSTGRES_URL") or os.getenv("DATABASE_URL"))
+DATABASE_URL = normalize_database_url(os.getenv("DATABASE_URL") or os.getenv("POSTGRES_URL"))
 if not DATABASE_URL:
     sqlite_path = Path(ROOT_DIR) / "agentic_ai_tender.db"
     DATABASE_URL = f"sqlite+aiosqlite:///{sqlite_path}"
